@@ -1,0 +1,69 @@
+service: drishlio-lambdas
+
+provider:
+  name: aws
+  runtime: python3.9
+  region: ${env:aws_region, 'eu-central-1'}
+  stage: ${opt:stage, 'dev'}
+  environment:
+    jwt_secret: ${env:jwt_secret}
+    aws_bucket: ${env:aws_bucket}
+    aws_form_upload_folder: ${env:aws_form_upload_folder}
+    aws_gift_upload_folder: ${env:aws_gift_upload_folder}
+    aws_access_key_id: ${env:aws_access_key_id}
+    aws_secret_access_key: ${env:aws_secret_access_key}
+  
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - s3:PutObject
+            - s3:PutObjectAcl
+            - s3:GetObject
+            - s3:HeadBucket
+          Resource:
+            - "arn:aws:s3:::${env:aws_bucket}/*"
+            - "arn:aws:s3:::${env:aws_bucket}"
+
+functions:
+  fileUpload:
+    handler: lambdas/file_upload/handler.lambda_handler
+    name: ${self:provider.stage}-file-upload
+    description: Handles file uploads to S3
+    timeout: 30
+    events:
+      - http:
+          path: upload
+          method: post
+          cors: true
+
+  # Add your other 23 lambdas here following this pattern:
+  # lambdaName:
+  #   handler: lambdas/lambda_name/handler.lambda_handler
+  #   name: ${self:provider.stage}-lambda-name
+  #   description: Lambda description
+  #   timeout: 30
+  #   events:
+  #     - http:
+  #         path: endpoint-path
+  #         method: get/post/put/delete
+  #         cors: true
+
+plugins:
+  - serverless-python-requirements
+
+custom:
+  pythonRequirements:
+    dockerizePip: non-linux
+    layer: true
+
+package:
+  exclude:
+    - node_modules/**
+    - venv/**
+    - .venv/**
+    - .env
+    - .git/**
+    - tests/**
+    - "*.md"

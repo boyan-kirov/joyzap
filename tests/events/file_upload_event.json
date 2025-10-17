@@ -1,0 +1,25 @@
+{
+    "resource": "/upload",
+    "path": "/upload",
+    "httpMethod": "POST",
+    "headers": {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoxMjMsImV4cCI6OTk5OTk5OTk5OX0.test",
+        "Content-Type": "application/json"
+    },
+    "queryStringParameters": null,
+    "pathParameters": null,
+    "stageVariables": null,
+    "requestContext": {
+        "accountId": "123456789012",
+        "resourceId": "abc123",
+        "stage": "prod",
+        "requestId": "test-request-id",
+        "identity": {
+            "sourceIp": "127.0.0.1"
+        },
+        "resourcePath": "/upload",
+        "httpMethod": "POST"
+    },
+    "body": "{\"file\":\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==\",\"file_name\":\"test_image\",\"is_gift\":false}",
+    "isBase64Encoded": false
+}

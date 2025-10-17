@@ -1,0 +1,91 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Drishlio Lambda Functions
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: python3.9
+    Environment:
+      Variables:
+        jwt_secret: !Ref JWTSecret
+        aws_bucket: !Ref S3BucketName
+        aws_form_upload_folder: !Ref FormUploadFolder
+        aws_gift_upload_folder: !Ref GiftUploadFolder
+        aws_access_key_id: !Ref AWSAccessKeyId
+        aws_secret_access_key: !Ref AWSSecretAccessKey
+
+Parameters:
+  JWTSecret:
+    Type: String
+    Description: JWT secret for authentication
+    NoEcho: true
+  
+  S3BucketName:
+    Type: String
+    Description: S3 bucket name for file uploads
+  
+  FormUploadFolder:
+    Type: String
+    Default: forms
+    Description: S3 folder for form uploads
+  
+  GiftUploadFolder:
+    Type: String
+    Default: gifts
+    Description: S3 folder for gift uploads
+  
+  AWSAccessKeyId:
+    Type: String
+    Description: AWS Access Key ID
+    NoEcho: true
+  
+  AWSSecretAccessKey:
+    Type: String
+    Description: AWS Secret Access Key
+    NoEcho: true
+
+Resources:
+  # File Upload Lambda
+  FileUploadFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: drishlio-file-upload
+      CodeUri: .
+      Handler: lambdas.file_upload.handler.lambda_handler
+      Description: Handles file uploads to S3
+      Policies:
+        - S3CrudPolicy:
+            BucketName: !Ref S3BucketName
+      Events:
+        FileUploadApi:
+          Type: Api
+          Properties:
+            Path: /upload
+            Method: post
+
+  # Add more Lambda functions here as you convert them
+  # Example structure for your next 23 lambdas:
+  # 
+  # SecondLambdaFunction:
+  #   Type: AWS::Serverless::Function
+  #   Properties:
+  #     FunctionName: drishlio-second-function
+  #     CodeUri: .
+  #     Handler: lambdas.second_function.handler.lambda_handler
+  #     Description: Description of second lambda
+  #     Events:
+  #       Api:
+  #         Type: Api
+  #         Properties:
+  #           Path: /second
+  #           Method: get
+
+Outputs:
+  FileUploadApi:
+    Description: API Gateway endpoint URL for File Upload function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/upload/"
+  
+  FileUploadFunction:
+    Description: File Upload Lambda Function ARN
+    Value: !GetAtt FileUploadFunction.Arn

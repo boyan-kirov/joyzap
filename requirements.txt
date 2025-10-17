@@ -1,0 +1,19 @@
+# AWS Lambda Project Dependencies
+# Python runtime: 3.9+ (or specify your version)
+
+# AWS SDK
+boto3>=1.26.0
+botocore>=1.29.0
+
+# JWT Authentication
+PyJWT>=2.8.0
+
+# For local testing and development
+python-dotenv>=1.0.0
+
+# AWS SAM CLI for local testing (install globally)
+# aws-sam-cli
+
+# Optional: For enhanced local development
+# python-lambda-local>=0.1.13
+# localstack>=3.0.0
