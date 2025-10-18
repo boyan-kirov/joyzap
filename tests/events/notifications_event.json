@@ -1,0 +1,25 @@
+{
+    "resource": "/notifications",
+    "path": "/notifications",
+    "httpMethod": "GET",
+    "headers": {
+        "Authorization": "Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MTIzLCJleHAiOjk5OTk5OTk5OTl9.test",
+        "Content-Type": "application/json"
+    },
+    "queryStringParameters": null,
+    "pathParameters": null,
+    "stageVariables": null,
+    "requestContext": {
+        "accountId": "123456789012",
+        "resourceId": "abc123",
+        "stage": "prod",
+        "requestId": "test-request-id",
+        "identity": {
+            "sourceIp": "127.0.0.1"
+        },
+        "resourcePath": "/notifications",
+        "httpMethod": "GET"
+    },
+    "body": null,
+    "isBase64Encoded": false
+}

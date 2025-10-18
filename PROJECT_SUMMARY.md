@@ -47,24 +47,28 @@ drishlio/
 ## 🎯 What You Can Do Now
 
 ### 1. **Local Development** ✓
-- Run and test Lambda functions locally
-- Debug with breakpoints in VSCode
-- Test without deploying to AWS
+
+-   Run and test Lambda functions locally
+-   Debug with breakpoints in VSCode
+-   Test without deploying to AWS
 
 ### 2. **Easy Deployment** ✓
-- Deploy with AWS SAM CLI
-- Deploy with Serverless Framework
-- Update individual functions
+
+-   Deploy with AWS SAM CLI
+-   Deploy with Serverless Framework
+-   Update individual functions
 
 ### 3. **Shared Code** ✓
-- JWT authentication helper (`helpers/jwt.py`)
-- Response formatter (`helpers/response.py`)
-- Easy to add more shared utilities
+
+-   JWT authentication helper (`helpers/jwt.py`)
+-   Response formatter (`helpers/response.py`)
+-   Easy to add more shared utilities
 
 ### 4. **Testing** ✓
-- Local test script (`test_local.py`)
-- SAM local API for full API testing
-- Test event templates
+
+-   Local test script (`test_local.py`)
+-   SAM local API for full API testing
+-   Test event templates
 
 ## 🚀 Next Steps to Complete Your Project
 
@@ -90,6 +94,7 @@ nano .env
 You have **three options**:
 
 #### Option A: Use the Creation Script (Fastest)
+
 ```bash
 # Example: Create a user management Lambda
 ./create_lambda.sh user_management post /users
@@ -102,6 +107,7 @@ You have **three options**:
 ```
 
 #### Option B: Manual Creation
+
 ```bash
 # 1. Create directory
 mkdir -p lambdas/my_function
@@ -115,6 +121,7 @@ cp lambda_template.py lambdas/my_function/handler.py
 ```
 
 #### Option C: Paste Your Existing Lambda Code
+
 Simply paste your existing Lambda code into the new handler.py files and adjust imports.
 
 ### Step 3: Test Locally
@@ -147,19 +154,20 @@ serverless deploy
 
 For each Lambda function you need to convert:
 
-- [ ] Create directory: `lambdas/<function_name>/`
-- [ ] Create `__init__.py` file
-- [ ] Create `handler.py` with lambda_handler function
-- [ ] Update imports to use shared helpers
-- [ ] Add to `template.yaml` (AWS SAM)
-- [ ] Add to `serverless.yml` (Serverless Framework)
-- [ ] Create test event in `tests/events/`
-- [ ] Test locally
-- [ ] Deploy and verify
+-   [ ] Create directory: `lambdas/<function_name>/`
+-   [ ] Create `__init__.py` file
+-   [ ] Create `handler.py` with lambda_handler function
+-   [ ] Update imports to use shared helpers
+-   [ ] Add to `template.yaml` (AWS SAM)
+-   [ ] Add to `serverless.yml` (Serverless Framework)
+-   [ ] Create test event in `tests/events/`
+-   [ ] Test locally
+-   [ ] Deploy and verify
 
 ## 🛠️ Key Features Implemented
 
 ### 1. JWT Authentication
+
 ```python
 from helpers.jwt import JWT, AuthorizationError
 
@@ -168,6 +176,7 @@ decoded_token = jwt_helper.auth(event)
 ```
 
 ### 2. Standardized Responses
+
 ```python
 from helpers.response import Response
 
@@ -179,50 +188,57 @@ return Response.error(400, "Error details", "Bad Request")
 ```
 
 ### 3. Environment Variables
+
 All sensitive data is in `.env` file:
-- JWT secrets
-- AWS credentials
-- S3 bucket configuration
+
+-   JWT secrets
+-   AWS credentials
+-   S3 bucket configuration
 
 ### 4. Local Testing
+
 ```python
 # test_local.py
 python test_local.py
 ```
 
 ### 5. VSCode Debugging
-- Press F5 to debug
-- Set breakpoints
-- Inspect variables
+
+-   Press F5 to debug
+-   Set breakpoints
+-   Inspect variables
 
 ## 📝 Example: Adding Your Second Lambda
 
 Let's say you have a "get_user" Lambda. Here's how to add it:
 
 ### Step 1: Create the Lambda
+
 ```bash
 ./create_lambda.sh get_user get /users/{id}
 ```
 
 ### Step 2: Implement Logic
+
 Edit `lambdas/get_user/handler.py`:
+
 ```python
 def lambda_handler(event, context):
     try:
         jwt_helper = JWT(os.environ["jwt_secret"])
         jwt_helper.auth(event)
-        
+
         # Get user ID from path parameters
         user_id = event['pathParameters']['id']
-        
+
         # Your logic to fetch user
         user_data = {
             "id": user_id,
             "name": "John Doe"
         }
-        
+
         return Response.ok(user_data)
-        
+
     except AuthorizationError as e:
         return Response.error(e.status_code, "", "Unauthorized")
     except Exception as e:
@@ -230,34 +246,37 @@ def lambda_handler(event, context):
 ```
 
 ### Step 3: Add to template.yaml
+
 ```yaml
-  GetUserFunction:
+GetUserFunction:
     Type: AWS::Serverless::Function
     Properties:
-      FunctionName: drishlio-get-user
-      CodeUri: .
-      Handler: lambdas.get_user.handler.lambda_handler
-      Events:
-        Api:
-          Type: Api
-          Properties:
-            Path: /users/{id}
-            Method: get
+        FunctionName: drishlio-get-user
+        CodeUri: .
+        Handler: lambdas.get_user.handler.lambda_handler
+        Events:
+            Api:
+                Type: Api
+                Properties:
+                    Path: /users/{id}
+                    Method: get
 ```
 
 ### Step 4: Add to serverless.yml
+
 ```yaml
-  getUser:
+getUser:
     handler: lambdas/get_user/handler.lambda_handler
     name: ${self:provider.stage}-get-user
     events:
-      - http:
-          path: users/{id}
-          method: get
-          cors: true
+        - http:
+              path: users/{id}
+              method: get
+              cors: true
 ```
 
 ### Step 5: Test
+
 ```bash
 # Test locally
 sam local start-api
@@ -270,14 +289,17 @@ sam deploy
 ## 🔧 Customization Tips
 
 ### Add More Helpers
+
 Create new files in `helpers/` for:
-- Database connections
-- Email sending
-- File processing
-- API clients
-- Logging utilities
+
+-   Database connections
+-   Email sending
+-   File processing
+-   API clients
+-   Logging utilities
 
 Example:
+
 ```python
 # helpers/database.py
 import boto3
@@ -285,79 +307,88 @@ import boto3
 class Database:
     def __init__(self):
         self.dynamodb = boto3.resource('dynamodb')
-    
+
     def get_user(self, user_id):
         # Your logic
         pass
 ```
 
 ### Environment Variables
+
 Add new variables to `.env` and `.env.example`:
+
 ```bash
 # Database
 dynamodb_table_name=my-table
 
-# External APIs  
+# External APIs
 external_api_key=xxx
 external_api_url=https://api.example.com
 ```
 
 ### Shared Lambda Layers
+
 For common dependencies, create a Lambda Layer:
+
 ```yaml
 # template.yaml
-  SharedLayer:
+SharedLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
-      LayerName: drishlio-shared
-      ContentUri: layers/shared/
-      CompatibleRuntimes:
-        - python3.9
+        LayerName: drishlio-shared
+        ContentUri: layers/shared/
+        CompatibleRuntimes:
+            - python3.9
 ```
 
 ## 📚 Documentation Files
 
-- **README.md** - Complete project documentation
-- **QUICKSTART.md** - 5-minute quick start guide  
-- **PROJECT_SUMMARY.md** - This file
-- **.env.example** - Environment variable template
+-   **README.md** - Complete project documentation
+-   **QUICKSTART.md** - 5-minute quick start guide
+-   **PROJECT_SUMMARY.md** - This file
+-   **.env.example** - Environment variable template
 
 ## 🎓 Learning Resources
 
-- [AWS Lambda Documentation](https://docs.aws.amazon.com/lambda/)
-- [AWS SAM Documentation](https://docs.aws.amazon.com/serverless-application-model/)
-- [Serverless Framework](https://www.serverless.com/framework/docs)
-- [Boto3 Documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
+-   [AWS Lambda Documentation](https://docs.aws.amazon.com/lambda/)
+-   [AWS SAM Documentation](https://docs.aws.amazon.com/serverless-application-model/)
+-   [Serverless Framework](https://www.serverless.com/framework/docs)
+-   [Boto3 Documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
 
 ## 🆘 Getting Help
 
 ### Common Issues
 
 **"Module not found" errors:**
-- Activate virtual environment: `source venv/bin/activate`
-- Reinstall dependencies: `pip install -r requirements.txt`
+
+-   Activate virtual environment: `source venv/bin/activate`
+-   Reinstall dependencies: `pip install -r requirements.txt`
 
 **"AWS credentials not found":**
-- Check `.env` file has correct values
-- Or run: `aws configure`
+
+-   Check `.env` file has correct values
+-   Or run: `aws configure`
 
 **"Permission denied" on scripts:**
-- Make executable: `chmod +x setup.sh create_lambda.sh`
+
+-   Make executable: `chmod +x setup.sh create_lambda.sh`
 
 **Import errors in Lambda:**
-- Make sure `sys.path.append()` is in handler.py
-- Ensure `__init__.py` files exist in all directories
+
+-   Make sure `sys.path.append()` is in handler.py
+-   Ensure `__init__.py` files exist in all directories
 
 ## 🎉 You're Ready to Go!
 
 Your project is fully set up for:
-- ✅ Local development and testing
-- ✅ VSCode debugging
-- ✅ Easy deployment to AWS
-- ✅ Shared code and helpers
-- ✅ Standardized structure
-- ✅ Environment configuration
-- ✅ Version control ready
+
+-   ✅ Local development and testing
+-   ✅ VSCode debugging
+-   ✅ Easy deployment to AWS
+-   ✅ Shared code and helpers
+-   ✅ Standardized structure
+-   ✅ Environment configuration
+-   ✅ Version control ready
 
 **Next:** Run `./setup.sh` and start adding your remaining 23 Lambda functions!
 

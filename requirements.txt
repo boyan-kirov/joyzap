@@ -8,6 +8,15 @@ botocore>=1.29.0
 # JWT Authentication
 PyJWT>=2.8.0
 
+# Google OAuth
+google-auth>=2.23.0
+
+# Database
+psycopg2-binary>=2.9.0
+
+# Stripe
+stripe>=7.0.0
+
 # For local testing and development
 python-dotenv>=1.0.0
 

@@ -75,3 +75,13 @@ class Response:
             },
             'body': ''
         }
+    
+    @staticmethod
+    def bad_request(error_code, message):
+        """Create a bad request (400) response"""
+        return Response.error(400, error_code, message)
+    
+    @staticmethod
+    def validate_error(error_code, message):
+        """Create a validation error (422) response"""
+        return Response.error(422, error_code, message)

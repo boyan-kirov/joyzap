@@ -1,0 +1,13 @@
+{
+    "resource": "/user",
+    "path": "/user",
+    "httpMethod": "GET",
+    "headers": {
+        "Authorization": "Bearer test-token",
+        "Content-Type": "application/json"
+    },
+    "queryStringParameters": null,
+    "pathParameters": null,
+    "body": "{\"test\":\"data\"}",
+    "isBase64Encoded": false
+}

@@ -3,89 +3,357 @@ Transform: AWS::Serverless-2016-10-31
 Description: Drishlio Lambda Functions
 
 Globals:
-  Function:
-    Timeout: 30
-    Runtime: python3.9
-    Environment:
-      Variables:
-        jwt_secret: !Ref JWTSecret
-        aws_bucket: !Ref S3BucketName
-        aws_form_upload_folder: !Ref FormUploadFolder
-        aws_gift_upload_folder: !Ref GiftUploadFolder
-        aws_access_key_id: !Ref AWSAccessKeyId
-        aws_secret_access_key: !Ref AWSSecretAccessKey
+    Function:
+        Timeout: 30
+        Runtime: python3.9
+        Environment:
+            Variables:
+                jwt_secret: !Ref JWTSecret
+                GOOGLE_CLIENT_ID: !Ref GoogleClientId
+                aws_bucket: !Ref S3BucketName
+                aws_form_upload_folder: !Ref FormUploadFolder
+                aws_gift_upload_folder: !Ref GiftUploadFolder
+                aws_access_key_id: !Ref AWSAccessKeyId
+                aws_secret_access_key: !Ref AWSSecretAccessKey
+                conn_string: !Ref DatabaseConnectionString
+                db_host: !Ref DatabaseHost
+                db_port: !Ref DatabasePort
+                db_name: !Ref DatabaseName
+                db_user: !Ref DatabaseUser
+                db_password: !Ref DatabasePassword
+                secret_key: !Ref StripeSecretKey
+                endpoint_secret: !Ref StripeEndpointSecret
+                profit_account_id: !Ref StripeProfitAccountId
 
 Parameters:
-  JWTSecret:
-    Type: String
-    Description: JWT secret for authentication
-    NoEcho: true
-  
-  S3BucketName:
-    Type: String
-    Description: S3 bucket name for file uploads
-  
-  FormUploadFolder:
-    Type: String
-    Default: forms
-    Description: S3 folder for form uploads
-  
-  GiftUploadFolder:
-    Type: String
-    Default: gifts
-    Description: S3 folder for gift uploads
-  
-  AWSAccessKeyId:
-    Type: String
-    Description: AWS Access Key ID
-    NoEcho: true
-  
-  AWSSecretAccessKey:
-    Type: String
-    Description: AWS Secret Access Key
-    NoEcho: true
+    JWTSecret:
+        Type: String
+        Description: JWT secret for authentication
+        NoEcho: true
+
+    GoogleClientId:
+        Type: String
+        Description: Google OAuth Client ID
+        NoEcho: true
+
+    S3BucketName:
+        Type: String
+        Description: S3 bucket name for file uploads
+
+    FormUploadFolder:
+        Type: String
+        Default: forms
+        Description: S3 folder for form uploads
+
+    GiftUploadFolder:
+        Type: String
+        Default: gifts
+        Description: S3 folder for gift uploads
+
+    AWSAccessKeyId:
+        Type: String
+        Description: AWS Access Key ID
+        NoEcho: true
+
+    AWSSecretAccessKey:
+        Type: String
+        Description: AWS Secret Access Key
+        NoEcho: true
+
+    DatabaseConnectionString:
+        Type: String
+        Description: PostgreSQL database connection string
+        NoEcho: true
+
+    DatabaseHost:
+        Type: String
+        Description: Database host
+        NoEcho: true
+
+    DatabasePort:
+        Type: String
+        Default: '5432'
+        Description: Database port
+
+    DatabaseName:
+        Type: String
+        Description: Database name
+        NoEcho: true
+
+    DatabaseUser:
+        Type: String
+        Description: Database user
+        NoEcho: true
+
+    DatabasePassword:
+        Type: String
+        Description: Database password
+        NoEcho: true
+
+    StripeSecretKey:
+        Type: String
+        Description: Stripe secret key
+        NoEcho: true
+
+    StripeEndpointSecret:
+        Type: String
+        Description: Stripe webhook endpoint secret
+        NoEcho: true
+
+    StripeProfitAccountId:
+        Type: String
+        Description: Stripe profit account ID
+        NoEcho: true
 
 Resources:
-  # File Upload Lambda
-  FileUploadFunction:
-    Type: AWS::Serverless::Function
-    Properties:
-      FunctionName: drishlio-file-upload
-      CodeUri: .
-      Handler: lambdas.file_upload.handler.lambda_handler
-      Description: Handles file uploads to S3
-      Policies:
-        - S3CrudPolicy:
-            BucketName: !Ref S3BucketName
-      Events:
-        FileUploadApi:
-          Type: Api
-          Properties:
-            Path: /upload
-            Method: post
+    # File Upload Lambda
+    FileUploadFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-file-upload
+            CodeUri: .
+            Handler: lambdas.file_upload.handler.lambda_handler
+            Description: Handles file uploads to S3
+            Policies:
+                - S3CrudPolicy:
+                      BucketName: !Ref S3BucketName
+            Events:
+                FileUploadApi:
+                    Type: Api
+                    Properties:
+                        Path: /upload
+                        Method: post
 
-  # Add more Lambda functions here as you convert them
-  # Example structure for your next 23 lambdas:
-  # 
-  # SecondLambdaFunction:
-  #   Type: AWS::Serverless::Function
-  #   Properties:
-  #     FunctionName: drishlio-second-function
-  #     CodeUri: .
-  #     Handler: lambdas.second_function.handler.lambda_handler
-  #     Description: Description of second lambda
-  #     Events:
-  #       Api:
-  #         Type: Api
-  #         Properties:
-  #           Path: /second
-  #           Method: get
+    # WebSocket Disconnect Lambda
+    WebsocketDisconnectFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-websocket-disconnect
+            CodeUri: .
+            Handler: lambdas.websocket_disconnect.handler.lambda_handler
+            Description: Handles WebSocket disconnections and clears socket_id from database
+            Events:
+                WebSocketDisconnect:
+                    Type: Api
+                    Properties:
+                        Path: /$disconnect
+                        Method: post
+
+    # My Friends Lambda
+    MyFriendsFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-my-friends
+            CodeUri: .
+            Handler: lambdas.my_friends.handler.lambda_handler
+            Description: Get user's friends list with optional keyword search
+            Events:
+                GetFriends:
+                    Type: Api
+                    Properties:
+                        Path: /friends
+                        Method: get
+
+    # Notifications Lambda
+    NotificationsFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-notifications
+            CodeUri: .
+            Handler: lambdas.notifications.handler.lambda_handler
+            Description: Get and update user notifications
+            Events:
+                GetNotifications:
+                    Type: Api
+                    Properties:
+                        Path: /notifications
+                        Method: get
+                UpdateNotifications:
+                    Type: Api
+                    Properties:
+                        Path: /notifications
+                        Method: put
+
+    # Stripe Webhook Lambda
+    StripeWebhookFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-stripe-webhook
+            CodeUri: .
+            Handler: lambdas.stripe_webhook.handler.lambda_handler
+            Description: Handle Stripe webhook events
+            Events:
+                StripeWebhook:
+                    Type: Api
+                    Properties:
+                        Path: /stripe/webhook
+                        Method: post
+
+    # Gift Management Lambda
+    GiftManagementFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-gift-management
+            CodeUri: .
+            Handler: lambdas.gift_management.handler.lambda_handler
+            Description: Manage gifts (CRUD operations)
+            Events:
+                GetGiftCategories:
+                    Type: Api
+                    Properties:
+                        Path: /gift/categories
+                        Method: get
+                CreateGift:
+                    Type: Api
+                    Properties:
+                        Path: /gift
+                        Method: post
+                UpdateGift:
+                    Type: Api
+                    Properties:
+                        Path: /gift/{id}
+                        Method: patch
+                BulkUpdateGifts:
+                    Type: Api
+                    Properties:
+                        Path: /gift
+                        Method: put
+
+    # Dashboard Statistics Lambda
+    DashboardStatisticsFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-dashboard-statistics
+            CodeUri: .
+            Handler: lambdas.dashboard_statistics.handler.lambda_handler
+            Description: Get dashboard and transaction statistics
+            Events:
+                GetStatistics:
+                    Type: Api
+                    Properties:
+                        Path: /dashboard/statistics
+                        Method: get
+
+    # WebSocket Connect Lambda
+    WebsocketConnectFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-websocket-connect
+            CodeUri: .
+            Handler: lambdas.websocket_connect.handler.lambda_handler
+            Description: Handle WebSocket connections and store socket_id
+            Events:
+                WebSocketConnect:
+                    Type: Api
+                    Properties:
+                        Path: /connect
+                        Method: post
+
+    # Google Auth Lambda
+    GoogleAuthFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-google-auth
+            CodeUri: .
+            Handler: lambdas.google_auth.handler.lambda_handler
+            Description: Handle Google OAuth authentication
+            Environment:
+                Variables:
+                    GOOGLE_CLIENT_ID: !Ref GoogleClientId
+            Events:
+                GoogleAuth:
+                    Type: Api
+                    Properties:
+                        Path: /auth/google
+                        Method: post
+
+    # Relation Management Lambda
+    RelationManagementFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-relation-management
+            CodeUri: .
+            Handler: lambdas.relation_management.handler.lambda_handler
+            Description: Manage friend relationships (send, accept, reject, delete)
+            Events:
+                SendFriendRequest:
+                    Type: Api
+                    Properties:
+                        Path: /relation
+                        Method: post
+                AcceptFriendRequest:
+                    Type: Api
+                    Properties:
+                        Path: /relation
+                        Method: put
+                RejectFriendRequest:
+                    Type: Api
+                    Properties:
+                        Path: /relation
+                        Method: patch
+                DeleteFriend:
+                    Type: Api
+                    Properties:
+                        Path: /relation
+                        Method: delete
+
+    # Calendar Events Lambda
+    CalendarEventsFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-calendar-events
+            CodeUri: .
+            Handler: lambdas.calendar_events.handler.lambda_handler
+            Description: Manage calendar events (CRUD operations)
+            Events:
+                SearchCalendarEvents:
+                    Type: Api
+                    Properties:
+                        Path: /calendar
+                        Method: get
+                CreateCalendarEvent:
+                    Type: Api
+                    Properties:
+                        Path: /calendar
+                        Method: post
+                GetCalendarEventDetail:
+                    Type: Api
+                    Properties:
+                        Path: /calendar/{id}
+                        Method: get
+                UpdateCalendarEvent:
+                    Type: Api
+                    Properties:
+                        Path: /calendar
+                        Method: put
+                DeleteCalendarEvent:
+                    Type: Api
+                    Properties:
+                        Path: /calendar/{id}
+                        Method: delete
+
+    # Add more Lambda functions here as you convert them
+    # Example structure for your next 13 lambdas:
+    #
+    # SecondLambdaFunction:
+    #   Type: AWS::Serverless::Function
+    #   Properties:
+    #     FunctionName: drishlio-second-function
+    #     CodeUri: .
+    #     Handler: lambdas.second_function.handler.lambda_handler
+    #     Description: Description of second lambda
+    #     Events:
+    #       Api:
+    #         Type: Api
+    #         Properties:
+    #           Path: /second
+    #           Method: get
 
 Outputs:
-  FileUploadApi:
-    Description: API Gateway endpoint URL for File Upload function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/upload/"
-  
-  FileUploadFunction:
-    Description: File Upload Lambda Function ARN
-    Value: !GetAtt FileUploadFunction.Arn
+    FileUploadApi:
+        Description: API Gateway endpoint URL for File Upload function
+        Value: !Sub 'https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/upload/'
+
+    FileUploadFunction:
+        Description: File Upload Lambda Function ARN
+        Value: !GetAtt FileUploadFunction.Arn

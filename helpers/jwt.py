@@ -78,3 +78,16 @@ class JWT:
         payload['iat'] = datetime.utcnow()
         
         return jwt.encode(payload, self.secret, algorithm='HS256')
+    
+    def encode(self, payload, expires_in_hours=24):
+        """
+        Alias for generate_token for backward compatibility.
+        
+        Args:
+            payload: Dictionary containing token claims
+            expires_in_hours: Token expiration time in hours
+            
+        Returns:
+            Encoded JWT token string
+        """
+        return self.generate_token(payload, expires_in_hours)

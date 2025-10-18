@@ -320,9 +320,10 @@ GitHub Repository
 ---
 
 This architecture provides:
-- ✅ Modularity (each Lambda is independent)
-- ✅ Reusability (shared helpers)
-- ✅ Testability (local testing)
-- ✅ Scalability (AWS auto-scaling)
-- ✅ Maintainability (organized structure)
-- ✅ Security (JWT auth, environment variables)
+
+-   ✅ Modularity (each Lambda is independent)
+-   ✅ Reusability (shared helpers)
+-   ✅ Testability (local testing)
+-   ✅ Scalability (AWS auto-scaling)
+-   ✅ Maintainability (organized structure)
+-   ✅ Security (JWT auth, environment variables)

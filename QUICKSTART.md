@@ -22,19 +22,22 @@ nano .env
 ```
 
 Required values:
-- `jwt_secret` - Your JWT secret key
-- `aws_access_key_id` - AWS access key
-- `aws_secret_access_key` - AWS secret key  
-- `aws_bucket` - Your S3 bucket name
+
+-   `jwt_secret` - Your JWT secret key
+-   `aws_access_key_id` - AWS access key
+-   `aws_secret_access_key` - AWS secret key
+-   `aws_bucket` - Your S3 bucket name
 
 ### 3. Test Locally
 
 **Option A: Simple Python test**
+
 ```bash
 python test_local.py
 ```
 
 **Option B: AWS SAM local API**
+
 ```bash
 # Build first
 sam build
@@ -52,6 +55,7 @@ curl -X POST http://localhost:3000/upload \
 ### 4. Deploy to AWS
 
 **Using AWS SAM:**
+
 ```bash
 sam build
 sam deploy --guided  # First time only
@@ -59,6 +63,7 @@ sam deploy           # Subsequent deploys
 ```
 
 **Using Serverless Framework:**
+
 ```bash
 serverless deploy
 ```
@@ -68,45 +73,48 @@ serverless deploy
 ### Quick Template
 
 1. **Create directory:**
-   ```bash
-   mkdir -p lambdas/my_function
-   touch lambdas/my_function/__init__.py
-   ```
+
+    ```bash
+    mkdir -p lambdas/my_function
+    touch lambdas/my_function/__init__.py
+    ```
 
 2. **Copy template:**
-   ```bash
-   cp lambda_template.py lambdas/my_function/handler.py
-   ```
+
+    ```bash
+    cp lambda_template.py lambdas/my_function/handler.py
+    ```
 
 3. **Update handler.py** with your logic
 
 4. **Add to template.yaml:**
-   ```yaml
-   MyFunction:
-     Type: AWS::Serverless::Function
-     Properties:
-       FunctionName: drishlio-my-function
-       CodeUri: .
-       Handler: lambdas.my_function.handler.lambda_handler
-       Events:
-         Api:
-           Type: Api
-           Properties:
-             Path: /my-path
-             Method: post
-   ```
+
+    ```yaml
+    MyFunction:
+        Type: AWS::Serverless::Function
+        Properties:
+            FunctionName: drishlio-my-function
+            CodeUri: .
+            Handler: lambdas.my_function.handler.lambda_handler
+            Events:
+                Api:
+                    Type: Api
+                    Properties:
+                        Path: /my-path
+                        Method: post
+    ```
 
 5. **Add to serverless.yml:**
-   ```yaml
-   myFunction:
-     handler: lambdas/my_function/handler.lambda_handler
-     name: ${self:provider.stage}-my-function
-     events:
-       - http:
-           path: my-path
-           method: post
-           cors: true
-   ```
+    ```yaml
+    myFunction:
+        handler: lambdas/my_function/handler.lambda_handler
+        name: ${self:provider.stage}-my-function
+        events:
+            - http:
+                  path: my-path
+                  method: post
+                  cors: true
+    ```
 
 ## 🐛 Debugging in VSCode
 
@@ -144,19 +152,23 @@ aws s3 ls
 ## ❓ Troubleshooting
 
 **Import errors:**
-- Make sure virtual environment is activated: `source venv/bin/activate`
-- Reinstall dependencies: `pip install -r requirements.txt`
+
+-   Make sure virtual environment is activated: `source venv/bin/activate`
+-   Reinstall dependencies: `pip install -r requirements.txt`
 
 **AWS credentials not found:**
-- Check .env file has correct values
-- Or configure AWS CLI: `aws configure`
+
+-   Check .env file has correct values
+-   Or configure AWS CLI: `aws configure`
 
 **SAM commands not working:**
-- Install SAM CLI: `pip install aws-sam-cli`
+
+-   Install SAM CLI: `pip install aws-sam-cli`
 
 **Module not found errors:**
-- Make sure you have `__init__.py` files in all directories
-- Check `sys.path.append()` in handler files
+
+-   Make sure you have `__init__.py` files in all directories
+-   Check `sys.path.append()` in handler files
 
 ## 📚 Next Steps
 
@@ -168,14 +180,14 @@ aws s3 ls
 
 ## 💡 Tips
 
-- Use `lambda_template.py` as a starting point for new functions
-- Keep shared code in `helpers/` directory
-- Test locally before deploying
-- Use environment variables for configuration
-- Enable CloudWatch logs for debugging
+-   Use `lambda_template.py` as a starting point for new functions
+-   Keep shared code in `helpers/` directory
+-   Test locally before deploying
+-   Use environment variables for configuration
+-   Enable CloudWatch logs for debugging
 
 ## 🔗 Resources
 
-- [AWS SAM Documentation](https://docs.aws.amazon.com/serverless-application-model/)
-- [Serverless Framework](https://www.serverless.com/framework/docs)
-- [Boto3 Documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)
+-   [AWS SAM Documentation](https://docs.aws.amazon.com/serverless-application-model/)
+-   [Serverless Framework](https://www.serverless.com/framework/docs)
+-   [Boto3 Documentation](https://boto3.amazonaws.com/v1/documentation/api/latest/index.html)

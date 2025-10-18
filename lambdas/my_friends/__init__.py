@@ -1,0 +1,1 @@
+# MyFriends Lambda module

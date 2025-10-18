@@ -1,69 +1,231 @@
 service: drishlio-lambdas
 
 provider:
-  name: aws
-  runtime: python3.9
-  region: ${env:aws_region, 'eu-central-1'}
-  stage: ${opt:stage, 'dev'}
-  environment:
-    jwt_secret: ${env:jwt_secret}
-    aws_bucket: ${env:aws_bucket}
-    aws_form_upload_folder: ${env:aws_form_upload_folder}
-    aws_gift_upload_folder: ${env:aws_gift_upload_folder}
-    aws_access_key_id: ${env:aws_access_key_id}
-    aws_secret_access_key: ${env:aws_secret_access_key}
-  
-  iam:
-    role:
-      statements:
-        - Effect: Allow
-          Action:
-            - s3:PutObject
-            - s3:PutObjectAcl
-            - s3:GetObject
-            - s3:HeadBucket
-          Resource:
-            - "arn:aws:s3:::${env:aws_bucket}/*"
-            - "arn:aws:s3:::${env:aws_bucket}"
+    name: aws
+    runtime: python3.9
+    region: ${env:aws_region, 'eu-central-1'}
+    stage: ${opt:stage, 'dev'}
+    environment:
+        jwt_secret: ${env:jwt_secret}
+        GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID}
+        aws_bucket: ${env:aws_bucket}
+        aws_form_upload_folder: ${env:aws_form_upload_folder}
+        aws_gift_upload_folder: ${env:aws_gift_upload_folder}
+        aws_access_key_id: ${env:aws_access_key_id}
+        aws_secret_access_key: ${env:aws_secret_access_key}
+        conn_string: ${env:conn_string}
+        db_host: ${env:db_host}
+        db_port: ${env:db_port}
+        db_name: ${env:db_name}
+        db_user: ${env:db_user}
+        db_password: ${env:db_password}
+        secret_key: ${env:secret_key}
+        endpoint_secret: ${env:endpoint_secret}
+        profit_account_id: ${env:profit_account_id}
+
+    iam:
+        role:
+            statements:
+                - Effect: Allow
+                  Action:
+                      - s3:PutObject
+                      - s3:PutObjectAcl
+                      - s3:GetObject
+                      - s3:HeadBucket
+                  Resource:
+                      - 'arn:aws:s3:::${env:aws_bucket}/*'
+                      - 'arn:aws:s3:::${env:aws_bucket}'
 
 functions:
-  fileUpload:
-    handler: lambdas/file_upload/handler.lambda_handler
-    name: ${self:provider.stage}-file-upload
-    description: Handles file uploads to S3
-    timeout: 30
-    events:
-      - http:
-          path: upload
-          method: post
-          cors: true
+    fileUpload:
+        handler: lambdas/file_upload/handler.lambda_handler
+        name: ${self:provider.stage}-file-upload
+        description: Handles file uploads to S3
+        timeout: 30
+        events:
+            - http:
+                  path: upload
+                  method: post
+                  cors: true
 
-  # Add your other 23 lambdas here following this pattern:
-  # lambdaName:
-  #   handler: lambdas/lambda_name/handler.lambda_handler
-  #   name: ${self:provider.stage}-lambda-name
-  #   description: Lambda description
-  #   timeout: 30
-  #   events:
-  #     - http:
-  #         path: endpoint-path
-  #         method: get/post/put/delete
-  #         cors: true
+    websocketDisconnect:
+        handler: lambdas/websocket_disconnect/handler.lambda_handler
+        name: ${self:provider.stage}-websocket-disconnect
+        description: Handles WebSocket disconnections
+        timeout: 30
+        events:
+            - websocket:
+                  route: $disconnect
+
+    myFriends:
+        handler: lambdas/my_friends/handler.lambda_handler
+        name: ${self:provider.stage}-my-friends
+        description: Get user's friends list with keyword search
+        timeout: 30
+        events:
+            - http:
+                  path: friends
+                  method: get
+                  cors: true
+
+    notifications:
+        handler: lambdas/notifications/handler.lambda_handler
+        name: ${self:provider.stage}-notifications
+        description: Get and update user notifications
+        timeout: 30
+        events:
+            - http:
+                  path: notifications
+                  method: get
+                  cors: true
+            - http:
+                  path: notifications
+                  method: put
+                  cors: true
+
+    stripeWebhook:
+        handler: lambdas/stripe_webhook/handler.lambda_handler
+        name: ${self:provider.stage}-stripe-webhook
+        description: Handle Stripe webhook events
+        timeout: 30
+        events:
+            - http:
+                  path: stripe/webhook
+                  method: post
+                  cors: true
+
+    giftManagement:
+        handler: lambdas/gift_management/handler.lambda_handler
+        name: ${self:provider.stage}-gift-management
+        description: Manage gifts (CRUD operations)
+        timeout: 30
+        events:
+            - http:
+                  path: gift/categories
+                  method: get
+                  cors: true
+            - http:
+                  path: gift
+                  method: post
+                  cors: true
+            - http:
+                  path: gift/{id}
+                  method: patch
+                  cors: true
+            - http:
+                  path: gift
+                  method: put
+                  cors: true
+
+    dashboardStatistics:
+        handler: lambdas/dashboard_statistics/handler.lambda_handler
+        name: ${self:provider.stage}-dashboard-statistics
+        description: Get dashboard and transaction statistics
+        timeout: 30
+        events:
+            - http:
+                  path: dashboard/statistics
+                  method: get
+                  cors: true
+
+    websocketConnect:
+        handler: lambdas/websocket_connect/handler.lambda_handler
+        name: ${self:provider.stage}-websocket-connect
+        description: Handle WebSocket connections
+        timeout: 30
+        events:
+            - websocket:
+                  route: $connect
+
+    googleAuth:
+        handler: lambdas/google_auth/handler.lambda_handler
+        name: ${self:provider.stage}-google-auth
+        description: Handle Google OAuth authentication
+        timeout: 30
+        environment:
+            GOOGLE_CLIENT_ID: ${env:GOOGLE_CLIENT_ID}
+        events:
+            - http:
+                  path: auth/google
+                  method: post
+                  cors: true
+
+    relationManagement:
+        handler: lambdas/relation_management/handler.lambda_handler
+        name: ${self:provider.stage}-relation-management
+        description: Manage friend relationships
+        timeout: 30
+        events:
+            - http:
+                  path: relation
+                  method: post
+                  cors: true
+            - http:
+                  path: relation
+                  method: put
+                  cors: true
+            - http:
+                  path: relation
+                  method: patch
+                  cors: true
+            - http:
+                  path: relation
+                  method: delete
+                  cors: true
+
+    calendarEvents:
+        handler: lambdas/calendar_events/handler.lambda_handler
+        name: ${self:provider.stage}-calendar-events
+        description: Manage calendar events
+        timeout: 30
+        events:
+            - http:
+                  path: calendar
+                  method: get
+                  cors: true
+            - http:
+                  path: calendar
+                  method: post
+                  cors: true
+            - http:
+                  path: calendar/{id}
+                  method: get
+                  cors: true
+            - http:
+                  path: calendar
+                  method: put
+                  cors: true
+            - http:
+                  path: calendar/{id}
+                  method: delete
+                  cors: true
+
+    # Add your other 13 lambdas here following this pattern:
+    # lambdaName:
+    #   handler: lambdas/lambda_name/handler.lambda_handler
+    #   name: ${self:provider.stage}-lambda-name
+    #   description: Lambda description
+    #   timeout: 30
+    #   events:
+    #     - http:
+    #         path: endpoint-path
+    #         method: get/post/put/delete
+    #         cors: true
 
 plugins:
-  - serverless-python-requirements
+    - serverless-python-requirements
 
 custom:
-  pythonRequirements:
-    dockerizePip: non-linux
-    layer: true
+    pythonRequirements:
+        dockerizePip: non-linux
+        layer: true
 
 package:
-  exclude:
-    - node_modules/**
-    - venv/**
-    - .venv/**
-    - .env
-    - .git/**
-    - tests/**
-    - "*.md"
+    exclude:
+        - node_modules/**
+        - venv/**
+        - .venv/**
+        - .env
+        - .git/**
+        - tests/**
+        - '*.md'
